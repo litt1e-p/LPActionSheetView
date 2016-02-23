@@ -14,13 +14,16 @@
 @property (nonatomic, strong) UIView *maskView;
 @property (nonatomic, strong) UIWindow *keyWindow;
 @property (nonatomic, strong) UITapGestureRecognizer *tapGR;
+@property (nonatomic, weak) UIView *header;
+@property (nonatomic, weak) UIView *footer;
+@property (nonatomic, strong) UIView *container;
 
 @end
 
 @implementation LPActionSheetView
 
 @synthesize maskViewExtend = _maskViewExtend;
-@synthesize dataSource = _dataSource;
+@synthesize dataSource     = _dataSource;
 @synthesize separatorStyle = _separatorStyle;
 
 - (instancetype)initWithFrame:(CGRect)frame
@@ -42,7 +45,8 @@
 - (void)sharedInit
 {
     [self.keyWindow addSubview:self.maskView];
-    [self.keyWindow addSubview:self.actionSheet];
+    [self.container addSubview:self.actionSheet];
+    [self.keyWindow addSubview:self.container];
 }
 
 #pragma mark - show or dismiss with animation 📌
@@ -50,7 +54,7 @@
 {
     [UIView animateWithDuration:0.25f animations:^{
         self.maskView.hidden   = NO;
-        self.actionSheet.frame = [self actionSheetTransFrame:YES];
+        self.container.frame = [self containerTransFrame:YES];
     }];
 }
 
@@ -58,15 +62,15 @@
 {
     [UIView animateWithDuration:0.25f animations:^{
         self.maskView.hidden   = YES;
-        self.actionSheet.frame = [self actionSheetTransFrame:NO];
+        self.container.frame = [self containerTransFrame:NO];
     }];
 }
 
-- (CGRect)actionSheetTransFrame:(BOOL)show
+- (CGRect)containerTransFrame:(BOOL)show
 {
     CGRect frame = self.frame;
     if (!show) {
-        frame = CGRectMake(frame.origin.x, self.keyWindow.frame.size.height, frame.size.width, frame.size.height);
+        frame.origin.y = self.keyWindow.frame.size.height;
     }
     return frame;
 }
@@ -106,7 +110,9 @@
     if (self.dataSource && [self.dataSource respondsToSelector:@selector(heightForSheetCellAtIndex:)]) {
         height = [self.dataSource heightForSheetCellAtIndex:indexPath.row];
     } else {
-        height = (self.actionSheet.frame.size.height - self.actionSheet.tableHeaderView.frame.size.height - self.actionSheet.tableFooterView.frame.size.height) / [self.dataSource numberOfSheetCell];
+        CGFloat headerHeight = self.header ? self.header.frame.size.height : 0.f;
+        CGFloat footerHeight = self.footer ? self.footer.frame.size.height : 0.f;
+        height = (self.container.frame.size.height - headerHeight - footerHeight) / [self.dataSource numberOfSheetCell];
     }
     return height;
 }
@@ -116,7 +122,7 @@
     UITableViewCell *cell = nil;
     if (self.dataSource && [self.dataSource respondsToSelector:@selector(sheetCellForRowAtIndex:)]) {
         NSString *identifier = [NSString stringWithFormat:@"kIdentifier%zi", indexPath.row];
-        cell = [tableView dequeueReusableCellWithIdentifier:identifier];
+        cell                 = [tableView dequeueReusableCellWithIdentifier:identifier];
         if (!cell) {
             cell = [self.dataSource sheetCellForRowAtIndex:indexPath.row];
         }
@@ -128,10 +134,23 @@
 - (void)setupActionSheetHeaderAndFooter
 {
     if (self.dataSource && [self.dataSource respondsToSelector:@selector(sheetViewHeader)]) {
-        self.actionSheet.tableHeaderView = [self.dataSource sheetViewHeader];
+        UIView *header         = [self.dataSource sheetViewHeader];
+        header.frame           = CGRectMake(0, 0, header.frame.size.width, header.frame.size.height);
+        CGRect sheetFrame      = self.actionSheet.frame;
+        sheetFrame.size.height -= header.frame.size.height;
+        sheetFrame.origin.y    += CGRectGetHeight(header.frame);
+        self.actionSheet.frame = sheetFrame;
+        self.header            = header;
+        [self.container addSubview:header];
     }
     if (self.dataSource && [self.dataSource respondsToSelector:@selector(sheetViewFooter)]) {
-        self.actionSheet.tableFooterView = [self.dataSource sheetViewFooter];
+        UIView *footer         = [self.dataSource sheetViewFooter];
+        footer.frame           = CGRectMake(0, CGRectGetHeight(self.container.frame) - footer.frame.size.height, footer.frame.size.width, footer.frame.size.height);
+        CGRect sheetFrame      = self.actionSheet.frame;
+        sheetFrame.size.height -= footer.frame.size.height;
+        self.actionSheet.frame = sheetFrame;
+        self.footer            = footer;
+        [self.container addSubview:footer];
     }
 }
 
@@ -208,16 +227,36 @@
     return _separatorStyle;
 }
 
+- (LPActionSheetCell *)selectedSheetCell
+{
+    LPActionSheetCell *cell = nil;
+    NSIndexPath *indexPath = [self.actionSheet indexPathForSelectedRow];
+    if (indexPath) {
+        cell = [self.actionSheet cellForRowAtIndexPath:indexPath];
+    }
+    return cell;
+}
+
 #pragma mark - lazyloads 📌
+- (UIView *)container
+{
+    if (!_container) {
+        CGRect frame   = self.frame;
+        UIView *container = [[UIView alloc] initWithFrame:CGRectMake(frame.origin.x, self.keyWindow.frame.size.height, frame.size.width, frame.size.height)];
+        self.container = container;
+    }
+    return _container;
+}
+
 - (UITableView *)actionSheet
 {
     if (!_actionSheet) {
-        CGRect frame      = self.frame;
-        UITableView *tb   = [[UITableView alloc] initWithFrame:CGRectMake(frame.origin.x, self.keyWindow.frame.size.height, frame.size.width, frame.size.height)];
-        tb.separatorStyle = (UITableViewCellSeparatorStyle)self.separatorStyle;
-        tb.dataSource     = self;
-        tb.delegate       = self;
-        _actionSheet      = tb;
+        UITableView *tb    = [[UITableView alloc] initWithFrame:CGRectMake(0, 0, self.container.frame.size.width, self.container.frame.size.height)];
+        tb.separatorStyle  = (UITableViewCellSeparatorStyle)self.separatorStyle;
+        tb.tableFooterView = [[UIView alloc] init];
+        tb.dataSource      = self;
+        tb.delegate        = self;
+        _actionSheet       = tb;
     }
     return _actionSheet;
 }
@@ -227,9 +266,9 @@
     if (!_maskView) {
         UIView *mask         = [[UIView alloc] initWithFrame:[self maskViewFrameCalc]];
         mask.backgroundColor = [UIColor colorWithWhite:0.f alpha:0.7];
-        [mask addGestureRecognizer:self.tapGR];
         _maskView            = mask;
         _maskView.hidden     = YES;
+        [_maskView addGestureRecognizer:self.tapGR];
     }
     return _maskView;
 }

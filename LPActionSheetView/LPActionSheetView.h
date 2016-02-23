@@ -48,6 +48,7 @@ typedef NS_ENUM(NSInteger, LPActionSheetCellSeparatorStyle)
 
 @property (nonatomic, assign) LPMaskViewExtend maskViewExtend;
 @property (nonatomic, strong, readonly) NSArray *selectedSheetRows;
+@property (nonatomic, strong, readonly) LPActionSheetCell *selectedSheetCell;
 @property (nonatomic, assign) LPActionSheetCellSeparatorStyle separatorStyle;
 
 - (void)show;

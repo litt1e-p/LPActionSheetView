@@ -29,6 +29,7 @@
 - (void)touchesBegan:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event
 {
     [self.actionSheetView show];
+//    NSLog(@"%@", self.actionSheetView.selectedSheetCell);
 }
 
 - (LPActionSheetView *)actionSheetView
