@@ -37,7 +37,9 @@ typedef NS_ENUM(NSInteger, LPActionSheetCellSeparatorStyle)
 
 @protocol LPActionSheetViewDelegate <NSObject>
 
+@optional
 - (void)didSelectedSheetRowAtIndex:(NSInteger)index;
+- (void)didDeSelectedSheetRowAtIndex:(NSInteger)index;
 
 @end
 
@@ -47,8 +49,9 @@ typedef NS_ENUM(NSInteger, LPActionSheetCellSeparatorStyle)
 @property (nonatomic, weak) id<LPActionSheetViewDelegate> delegate;
 
 @property (nonatomic, assign) LPMaskViewExtend maskViewExtend;
-@property (nonatomic, strong, readonly) NSArray *selectedSheetRows;
 @property (nonatomic, strong, readonly) LPActionSheetCell *selectedSheetCell;
+@property (nonatomic, strong, readonly) NSArray *selectedSheetRows;
+@property (nonatomic, strong, readonly) NSArray *allSheetCells;
 @property (nonatomic, assign) LPActionSheetCellSeparatorStyle separatorStyle;
 
 - (void)show;

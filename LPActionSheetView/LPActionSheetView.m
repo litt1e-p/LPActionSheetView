@@ -89,6 +89,13 @@
     }
 }
 
+- (void)tableView:(UITableView *)tableView didDeselectRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    if (self.delegate && [self.delegate respondsToSelector:@selector(didDeSelectedSheetRowAtIndex:)]) {
+        [self.delegate didDeSelectedSheetRowAtIndex:indexPath.row];
+    }
+}
+
 #pragma mark - UITableViewDadaSource 📌
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
 {
@@ -235,6 +242,30 @@
         cell = [self.actionSheet cellForRowAtIndexPath:indexPath];
     }
     return cell;
+}
+
+- (NSArray *)allSheetCells
+{
+    NSMutableArray *cells = [NSMutableArray array];
+    NSInteger count = [self.dataSource numberOfSheetCell];
+    if (count <= 0) {
+        return cells;
+    }
+    for (NSInteger i = 0; i < count; i++) {
+        NSIndexPath *indexPath = [NSIndexPath indexPathForRow:i inSection:0];
+        LPActionSheetCell *cell = [self.actionSheet cellForRowAtIndexPath:indexPath];
+        if (cell) {
+            [cells addObject:cell];
+        }
+        /** from below cell's frame is not correct */
+//        else (self.dataSource && [self.dataSource respondsToSelector:@selector(sheetCellForRowAtIndex:)]) {
+//            cell = [self.dataSource sheetCellForRowAtIndex:i];
+//            if (cell) {
+//                [cells addObject:cell];
+//            }
+//        }
+    }
+    return cells;
 }
 
 #pragma mark - lazyloads 📌

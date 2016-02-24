@@ -29,7 +29,8 @@
 - (void)touchesBegan:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event
 {
     [self.actionSheetView show];
-//    NSLog(@"%@", self.actionSheetView.selectedSheetCell);
+    //    NSLog(@"%@", self.actionSheetView.selectedSheetCell);
+//        NSLog(@"%@", self.actionSheetView.allSheetCells);
 }
 
 - (LPActionSheetView *)actionSheetView
@@ -116,5 +117,12 @@
 - (void)didSelectedSheetRowAtIndex:(NSInteger)index
 {
     NSLog(@"selected row at %zi", index);
+    NSLog(@"%@", self.actionSheetView.allSheetCells);
 }
+
+- (void)didDeSelectedSheetRowAtIndex:(NSInteger)index
+{
+    NSLog(@"deselected row at %zi", index);
+}
+
 @end
