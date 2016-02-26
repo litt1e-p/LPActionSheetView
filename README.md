@@ -6,6 +6,10 @@ fully custom action sheet view
 
 `pod 'LPActionSheetView', '~> 0.0.2'`
 
+# Screenshot
+
+<img src="screenshot.gif" width=320>
+
 # Release Notes
 
 - 0.0.2
