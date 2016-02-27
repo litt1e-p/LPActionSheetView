@@ -6,6 +6,21 @@ fully custom action sheet view
 
 `pod 'LPActionSheetView', '~> 0.0.3'`
 
+# Usage
+
+`LPActionSheetView is like a structure or container for actionSheet `
+
+- header & footer
+
+```swift
+// adopt dataSource protocol and implement with your custom header anything you want to set them in free totally!
+```
+
+- sheet cells
+```swift
+// adopt dataSource protocol as header & footer, do your any customization
+```
+
 # Screenshot
 
 <img src="screenshot.gif" width=320>
