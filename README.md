@@ -21,6 +21,17 @@ fully custom action sheet view
 // adopt dataSource protocol as header & footer, do your any customization
 ```
 
+- properties
+```swift
+//background mask view height type
+typedef NS_ENUM(NSInteger, LPMaskViewExtend)
+{
+    LPMaskViewExtendUnderStatusBar,
+    LPMaskViewExtendUnderNavigationBar,
+    LPMaskViewExtendFullScreen
+};
+```
+
 # Screenshot
 
 <img src="screenshot.gif" width=320>
