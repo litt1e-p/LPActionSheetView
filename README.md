@@ -13,12 +13,12 @@ fully custom action sheet view
 - header & footer
 
 ```swift
-// adopt dataSource protocol and implement with your custom header anything you want to set them in free totally!
+// conform dataSource protocol and implement with your custom header anything you want to set them in free totally!
 ```
 
 - sheet cells
 ```swift
-// adopt dataSource protocol as header & footer, do your any customization
+// conform dataSource protocol as header & footer, do your any customization
 ```
 
 - properties
