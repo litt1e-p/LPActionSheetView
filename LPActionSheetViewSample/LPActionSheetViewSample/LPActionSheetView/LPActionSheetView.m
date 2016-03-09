@@ -277,7 +277,7 @@
 - (NSArray *)allSheetCells
 {
     NSMutableArray *cells = [NSMutableArray array];
-    NSInteger count;
+    NSInteger count = 0;
     if (self.dataSource) {
         if ([self.dataSource respondsToSelector:@selector(numberOfSheetCell)]) {
             count = [self.dataSource numberOfSheetCell];
