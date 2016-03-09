@@ -114,9 +114,16 @@
 }
 
 #pragma mark - LPActionSheetViewDelegate 📌
-- (void)didSelectedSheetRowAtIndex:(NSInteger)index
+//- (void)didSelectedSheetRowAtIndex:(NSInteger)index
+//{
+//    NSLog(@"selected row at %zi", index);
+//    NSLog(@"%@", self.actionSheetView.allSheetCells);
+//}
+
+- (void)actionSheetView:(LPActionSheetView *)actionSheetView didSelectedSheetRowAtIndex:(NSInteger)index
 {
     NSLog(@"selected row at %zi", index);
+    NSLog(@"actionSheetView %@", actionSheetView);
     NSLog(@"%@", self.actionSheetView.allSheetCells);
 }
 
