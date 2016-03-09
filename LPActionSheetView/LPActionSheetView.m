@@ -84,15 +84,23 @@
 #pragma mark - UITableViewDelegate 📌
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    if (self.delegate && [self.delegate respondsToSelector:@selector(didSelectedSheetRowAtIndex:)]) {
-        [self.delegate didSelectedSheetRowAtIndex:indexPath.row];
+    if (self.delegate) {
+        if ([self.delegate respondsToSelector:@selector(didSelectedSheetRowAtIndex:)]) {
+            [self.delegate didSelectedSheetRowAtIndex:indexPath.row];
+        } else if ([self.delegate respondsToSelector:@selector(actionSheetView:didSelectedSheetRowAtIndex:)]) {
+            [self.delegate actionSheetView:self didSelectedSheetRowAtIndex:indexPath.row];
+        }
     }
 }
 
 - (void)tableView:(UITableView *)tableView didDeselectRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    if (self.delegate && [self.delegate respondsToSelector:@selector(didDeSelectedSheetRowAtIndex:)]) {
-        [self.delegate didDeSelectedSheetRowAtIndex:indexPath.row];
+    if (self.delegate) {
+        if ([self.delegate respondsToSelector:@selector(didDeSelectedSheetRowAtIndex:)]) {
+            [self.delegate didDeSelectedSheetRowAtIndex:indexPath.row];
+        } else if ([self.delegate respondsToSelector:@selector(actionSheetView:didDeSelectedSheetRowAtIndex:)]) {
+            [self.delegate actionSheetView:self didDeSelectedSheetRowAtIndex:indexPath.row];
+        }   
     }
 }
 
@@ -105,8 +113,12 @@
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
     NSInteger num = 0;
-    if (self.dataSource && [self.dataSource respondsToSelector:@selector(numberOfSheetCell)]) {
-        num = [self.dataSource numberOfSheetCell];
+    if (self.dataSource) {
+        if ([self.dataSource respondsToSelector:@selector(numberOfSheetCell)]) {
+            num = [self.dataSource numberOfSheetCell];
+        } else if ([self.dataSource respondsToSelector:@selector(numberOfSheetCellForActionSheetView:)]) {
+            num = [self.dataSource numberOfSheetCellForActionSheetView:self];
+        }
     }
     return num;
 }
@@ -114,8 +126,12 @@
 - (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
 {
     CGFloat height = 0;
-    if (self.dataSource && [self.dataSource respondsToSelector:@selector(heightForSheetCellAtIndex:)]) {
-        height = [self.dataSource heightForSheetCellAtIndex:indexPath.row];
+    if (self.dataSource && ([self.dataSource respondsToSelector:@selector(heightForSheetCellAtIndex:)] || [self.dataSource respondsToSelector:@selector(actionSheetView:heightForSheetCellAtIndex:)])) {
+        if ([self.dataSource respondsToSelector:@selector(heightForSheetCellAtIndex:)]) {
+            height = [self.dataSource heightForSheetCellAtIndex:indexPath.row];
+        } else if ([self.dataSource respondsToSelector:@selector(actionSheetView:heightForSheetCellAtIndex:)]) {
+            height = [self.dataSource actionSheetView:self heightForSheetCellAtIndex:indexPath.row];
+        }
     } else {
         CGFloat headerHeight = self.header ? self.header.frame.size.height : 0.f;
         CGFloat footerHeight = self.footer ? self.footer.frame.size.height : 0.f;
@@ -127,11 +143,15 @@
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
     UITableViewCell *cell = nil;
-    if (self.dataSource && [self.dataSource respondsToSelector:@selector(sheetCellForRowAtIndex:)]) {
+    if (self.dataSource) {
         NSString *identifier = [NSString stringWithFormat:@"kIdentifier%zi", indexPath.row];
         cell                 = [tableView dequeueReusableCellWithIdentifier:identifier];
         if (!cell) {
-            cell = [self.dataSource sheetCellForRowAtIndex:indexPath.row];
+            if ([self.dataSource respondsToSelector:@selector(sheetCellForRowAtIndex:)]) {
+                cell = [self.dataSource sheetCellForRowAtIndex:indexPath.row];
+            } else if ([self.dataSource respondsToSelector:@selector(actionSheetView:sheetCellForRowAtIndex:)]) {
+                cell = [self.dataSource actionSheetView:self sheetCellForRowAtIndex:indexPath.row];
+            }
         }
     }
     return cell;
@@ -140,8 +160,13 @@
 #pragma mark - setupActionSheetHeaderAndFooter 📌
 - (void)setupActionSheetHeaderAndFooter
 {
-    if (self.dataSource && [self.dataSource respondsToSelector:@selector(sheetViewHeader)]) {
-        UIView *header         = [self.dataSource sheetViewHeader];
+    if (self.dataSource) {
+        UIView *header;
+        if ([self.dataSource respondsToSelector:@selector(sheetViewHeader)]) {
+            header = [self.dataSource sheetViewHeader];
+        } else if ([self.dataSource respondsToSelector:@selector(sheetViewHeaderForActionSheetView:)]) {
+            header = [self.dataSource sheetViewHeaderForActionSheetView:self];
+        }
         header.frame           = CGRectMake(0, 0, header.frame.size.width, header.frame.size.height);
         CGRect sheetFrame      = self.actionSheet.frame;
         sheetFrame.size.height -= header.frame.size.height;
@@ -150,8 +175,13 @@
         self.header            = header;
         [self.container addSubview:header];
     }
-    if (self.dataSource && [self.dataSource respondsToSelector:@selector(sheetViewFooter)]) {
-        UIView *footer         = [self.dataSource sheetViewFooter];
+    if (self.dataSource) {
+        UIView *footer;
+        if ([self.dataSource respondsToSelector:@selector(sheetViewFooter)]) {
+            footer = [self.dataSource sheetViewFooter];
+        } else if ([self.dataSource respondsToSelector:@selector(sheetViewFooterForActionSheetView:)]) {
+            footer = [self.dataSource sheetViewFooterForActionSheetView:self];
+        }
         footer.frame           = CGRectMake(0, CGRectGetHeight(self.container.frame) - footer.frame.size.height, footer.frame.size.width, footer.frame.size.height);
         CGRect sheetFrame      = self.actionSheet.frame;
         sheetFrame.size.height -= footer.frame.size.height;
@@ -247,7 +277,14 @@
 - (NSArray *)allSheetCells
 {
     NSMutableArray *cells = [NSMutableArray array];
-    NSInteger count = [self.dataSource numberOfSheetCell];
+    NSInteger count;
+    if (self.dataSource) {
+        if ([self.dataSource respondsToSelector:@selector(numberOfSheetCell)]) {
+            count = [self.dataSource numberOfSheetCell];
+        } else if ([self.dataSource respondsToSelector:@selector(numberOfSheetCellForActionSheetView:)]) {
+            count = [self.dataSource numberOfSheetCellForActionSheetView:self];
+        }
+    }
     if (count <= 0) {
         return cells;
     }

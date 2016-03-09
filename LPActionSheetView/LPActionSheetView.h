@@ -8,6 +8,7 @@
 
 #import <UIKit/UIKit.h>
 #import "LPActionSheetCell.h"
+@class LPActionSheetView;
 
 typedef NS_ENUM(NSInteger, LPMaskViewExtend)
 {
@@ -25,21 +26,49 @@ typedef NS_ENUM(NSInteger, LPActionSheetCellSeparatorStyle)
 @protocol LPActionSheetViewDataSource <NSObject>
 
 @required
+/**
+ *  for simplified implementation
+ */
 - (NSInteger)numberOfSheetCell;
 - (LPActionSheetCell *)sheetCellForRowAtIndex:(NSInteger)index;
 
 @optional
+/**
+ *  for complex implementation
+ */
+- (NSInteger)numberOfSheetCellForActionSheetView:(LPActionSheetView *)actionSheetView;
+- (LPActionSheetCell *)actionSheetView:(LPActionSheetView *)actionSheetView sheetCellForRowAtIndex:(NSInteger)index;
+
+/**
+ *  for simplified implementation
+ */
 - (CGFloat)heightForSheetCellAtIndex:(NSInteger)index;
 - (UIView *)sheetViewHeader;
 - (UIView *)sheetViewFooter;
+
+/**
+ *  for complex implementation
+ */
+- (CGFloat)actionSheetView:(LPActionSheetView *)actionSheetView heightForSheetCellAtIndex:(NSInteger)index;
+- (UIView *)sheetViewHeaderForActionSheetView:(LPActionSheetView *)actionSheetView;
+- (UIView *)sheetViewFooterForActionSheetView:(LPActionSheetView *)actionSheetView;
 
 @end
 
 @protocol LPActionSheetViewDelegate <NSObject>
 
 @optional
+/**
+ *  for simplified implementation
+ */
 - (void)didSelectedSheetRowAtIndex:(NSInteger)index;
 - (void)didDeSelectedSheetRowAtIndex:(NSInteger)index;
+
+/**
+ *  for complex implementation
+ */
+- (void)actionSheetView:(LPActionSheetView *)actionSheetView didSelectedSheetRowAtIndex:(NSInteger)index;
+- (void)actionSheetView:(LPActionSheetView *)actionSheetView didDeSelectedSheetRowAtIndex:(NSInteger)index;
 
 @end
 
