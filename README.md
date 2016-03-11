@@ -4,7 +4,7 @@ fully custom action sheet view
 
 # Install
 
-`pod 'LPActionSheetView', '~> 0.0.3'`
+`pod 'LPActionSheetView', '~> 0.0.5'`
 
 # Usage
 
@@ -37,6 +37,14 @@ typedef NS_ENUM(NSInteger, LPMaskViewExtend)
 <img src="screenshot.gif" width=320>
 
 # Release Notes
+
+- 0.0.5
+
+add new feature of delegate & dataSource which bring instance back
+
+- 0.0.4
+
+discarded
 
 - 0.0.3
 
